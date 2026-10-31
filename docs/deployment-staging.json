@@ -1,0 +1,8 @@
+{
+  "worker": "pequizinho-staging",
+  "url": "https://pequizinho-staging.romariocristian94.workers.dev",
+  "deployment_id": "42d7114bae584fe7b2a939b045f46bec",
+  "storage": "durable-sqlite-per-family",
+  "migration_tag": "pequizinho-sqlite-v1",
+  "billing_enabled": false
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pequizinho-staging",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": false,
+  "preview_urls": true,
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "vars": {
+    "ENVIRONMENT": "local",
+    "BILLING_ENABLED": "false"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pequizinho-staging",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "env": {
+    "staging": {
+      "name": "pequizinho-staging",
+      "workers_dev": true,
+      "preview_urls": true,
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "BILLING_ENABLED": "false"
+      },
+      "main": "dist/durable-worker.mjs",
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "PEQUI_FAMILIES",
+            "class_name": "PequizinhoFamily"
+          },
+          {
+            "name": "PEQUI_CATALOG",
+            "class_name": "PequizinhoCatalog"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "pequizinho-sqlite-v1",
+          "new_sqlite_classes": [
+            "PequizinhoFamily",
+            "PequizinhoCatalog"
+          ]
+        }
+      ],
+      "d1_databases": []
+    }
+  }
+}

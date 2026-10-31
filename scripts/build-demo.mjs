@@ -1,0 +1,12 @@
+import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import {curriculum} from '../src/curriculum.mjs';
+await mkdir('dist',{recursive:true});
+const dataURL=async(path,type)=>`data:${type};base64,${(await readFile(path)).toString('base64')}`;
+let css=await readFile('public/style.css','utf8');
+for(const weight of [400,700,800,900])css=css.replaceAll(`/fonts/nunito-${weight}.ttf`,await dataURL(`public/fonts/nunito-${weight}.ttf`,'font/ttf'));
+const audios={};for(const file of await readdir('public/audio'))audios[file.replace('.mp3','')]=await dataURL('public/audio/'+file,'audio/mpeg');
+const demo=(await readFile('public/demo.js','utf8')).replace("const lessons=await fetch('/demo-lessons.json').then(r=>r.json());",`const lessons=${JSON.stringify(curriculum)};`).replace('export async function demoApi','async function demoApi');
+let js=await readFile('public/app.js','utf8');
+js=js.replace("const demoMode=new URLSearchParams(location.search).get('demo')==='1';",'const demoMode=true;').replace("const demoRequest=demoMode?(await import('./demo.js')).demoApi:null;",'const demoRequest=demoApi;').replaceAll('/brand.webp',await dataURL('public/brand.webp','image/webp')).replace('audioPath||`/audio/${slug}.mp3`','DEMO_AUDIO[slug]').replace("if('serviceWorker'in navigator)","if(false)");
+const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#246541"><title>Pequizinho — demonstração do MVP</title><style>${css}</style></head><body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="modal"></dialog><script type="module">const DEMO_AUDIO=${JSON.stringify(audios)};\nconst demoApi=await(async()=>{${demo}\nreturn demoApi;})();\n${js.replaceAll('</script','<\\/script')}</script></body></html>`;
+await writeFile('dist/Pequizinho-demo.html',html);console.log(`Demonstração independente: ${(Buffer.byteLength(html)/1024).toFixed(0)} KiB, dados fictícios, sem conexão com a API.`);
